@@ -22,6 +22,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 public class SilverMountainAssetRateRetriever implements AssetRateRetriever {
 
+	private static final String ASSET_ID_GOLD = "https://www.thesilvermountain.nl/nl/goudkoers/";
+
+	private static final String ASSET_ID_SILVER = "https://www.thesilvermountain.nl/nl/zilverkoers/";
+
 	private static final Pattern GOLD_RATE_LINE = Pattern
 			.compile("<p>&euro; ([0-9.,]*)<br /> <a href=\"/nl/goudkoers/\">Goudkoers &gt;</a></p>");
 
@@ -33,9 +37,14 @@ public class SilverMountainAssetRateRetriever implements AssetRateRetriever {
 	private Number silverValue = null;
 
 	@Override
-	public AssetRate getAssetRate(String assetName) {
-		if ("Physical Gold".equals(assetName)) {
+	public AssetRate getAssetRate(String assetId) {
+		if (ASSET_ID_GOLD.equals(assetId)) {
 			return new AssetRate() {
+
+				@Override
+				public String getAssetId() {
+					return ASSET_ID_GOLD;
+				}
 
 				@Override
 				public String getAssetName() {
@@ -52,8 +61,13 @@ public class SilverMountainAssetRateRetriever implements AssetRateRetriever {
 					return goldValue;
 				}
 			};
-		} else if ("Physical Silver".equals(assetName)) {
+		} else if (ASSET_ID_SILVER.equals(assetId)) {
 			return new AssetRate() {
+
+				@Override
+				public String getAssetId() {
+					return ASSET_ID_SILVER;
+				}
 
 				@Override
 				public String getAssetName() {
@@ -75,8 +89,8 @@ public class SilverMountainAssetRateRetriever implements AssetRateRetriever {
 	}
 
 	@Override
-	public String[] getAssetRateNames() {
-		return new String[] { "Physical Gold", "Physical Silver" };
+	public String[] getAssetRateIds() {
+		return new String[] { ASSET_ID_GOLD, ASSET_ID_SILVER };
 	}
 
 	@Override
@@ -84,7 +98,7 @@ public class SilverMountainAssetRateRetriever implements AssetRateRetriever {
 		HttpClient httpClient = new DefaultHttpClient();
 		InputStream contentStream = null;
 		try {
-			HttpGet get = new HttpGet("https://www.thesilvermountain.nl/nl/goudkoers/");
+			HttpGet get = new HttpGet(ASSET_ID_GOLD);
 			HttpResponse response = httpClient.execute(get);
 			HttpEntity entity = response.getEntity();
 			contentStream = entity.getContent();

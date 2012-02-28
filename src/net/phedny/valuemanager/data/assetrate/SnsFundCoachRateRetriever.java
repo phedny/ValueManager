@@ -33,7 +33,7 @@ public class SnsFundCoachRateRetriever implements AssetRateRetriever {
 			.compile(".*<td[^>]*>(&#[0-9]*;|[A-Z]*)</td><td[^>]*><a[^>]*>([0-9.,]*)</a></td>.*");
 
 	private static final Pattern NAME_LINE = Pattern
-			.compile(".*<td><a href=\"/fonds/[^\"]*\" class=\"Fondlist\">([^<]*)</a></td>.*");
+			.compile(".*<td><a href=\"(/fonds/[^\"]*)\" class=\"Fondlist\">([^<]*)</a></td>.*");
 
 	private static final Pattern COMPARE_LINE = Pattern
 			.compile(".*<td[^>]*><input[^>]*name=\"Compare\" value=\"([0-9]*)\"></td>.*");
@@ -51,15 +51,15 @@ public class SnsFundCoachRateRetriever implements AssetRateRetriever {
 	}
 
 	@Override
-	public AssetRate getAssetRate(String assetName) {
+	public AssetRate getAssetRate(String assetId) {
 		if (assetRates == null) {
 			return null;
 		}
-		return assetRates.get(assetName);
+		return assetRates.get(assetId);
 	}
 
 	@Override
-	public String[] getAssetRateNames() {
+	public String[] getAssetRateIds() {
 		if (assetRates == null) {
 			return null;
 		}
@@ -109,6 +109,7 @@ public class SnsFundCoachRateRetriever implements AssetRateRetriever {
 
 			String valueStr = null;
 			String expressedInStr = null;
+			String identifierStr = null;
 			String nameStr = null;
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -121,7 +122,8 @@ public class SnsFundCoachRateRetriever implements AssetRateRetriever {
 
 				m = NAME_LINE.matcher(line);
 				if (m.matches()) {
-					nameStr = m.group(1);
+					identifierStr = m.group(1);
+					nameStr = m.group(2);
 					continue;
 				}
 
@@ -130,6 +132,7 @@ public class SnsFundCoachRateRetriever implements AssetRateRetriever {
 
 					Locale dutchLocale = new Locale("nl", "NL");
 					NumberFormat numberParser = NumberFormat.getNumberInstance(dutchLocale);
+					final String assetId = "http://www.snsfundcoach.nl" + identifierStr;
 					final String assetName = nameStr;
 					final Number assetValue = numberParser.parse(valueStr);
 					final String expressedIn;
@@ -148,6 +151,11 @@ public class SnsFundCoachRateRetriever implements AssetRateRetriever {
 					AssetRate assetRate = new AssetRate() {
 
 						@Override
+						public String getAssetId() {
+							return assetId;
+						}
+
+						@Override
 						public String getAssetName() {
 							return assetName;
 						}
@@ -163,7 +171,7 @@ public class SnsFundCoachRateRetriever implements AssetRateRetriever {
 						}
 
 					};
-					assetRates.put(assetName, assetRate);
+					assetRates.put(assetId, assetRate);
 				}
 			}
 

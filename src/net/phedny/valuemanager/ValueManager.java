@@ -13,10 +13,10 @@ public class ValueManager {
 
 		for (AssetRateRetriever retriever : assetRateRetrievers) {
 			retriever.retrieve();
-			for (String assetName : retriever.getAssetRateNames()) {
-				AssetRate assetRate = retriever.getAssetRate(assetName);
-				System.out.format("%s: %s %s\n", assetRate.getAssetName(), assetRate.getExpressedIn(), assetRate
-						.getAssetValue());
+			for (String assetId : retriever.getAssetRateIds()) {
+				AssetRate assetRate = retriever.getAssetRate(assetId);
+				System.out.format("%s: %s %s [%s]\n", assetRate.getAssetName(), assetRate.getExpressedIn(), assetRate
+						.getAssetValue(), assetRate.getAssetId());
 			}
 		}
 	}

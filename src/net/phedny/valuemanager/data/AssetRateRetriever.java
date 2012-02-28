@@ -4,8 +4,8 @@ public interface AssetRateRetriever {
 
 	void retrieve();
 
-	AssetRate getAssetRate(String assetName);
+	AssetRate getAssetRate(String assetId);
 
-	String[] getAssetRateNames();
+	String[] getAssetRateIds();
 
 }
