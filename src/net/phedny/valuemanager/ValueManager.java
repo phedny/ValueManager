@@ -2,14 +2,13 @@ package net.phedny.valuemanager;
 
 import net.phedny.valuemanager.data.AssetRate;
 import net.phedny.valuemanager.data.AssetRateRetriever;
-import net.phedny.valuemanager.data.assetrate.SilverMountainAssetRateRetriever;
-import net.phedny.valuemanager.data.assetrate.SnsFundCoachRateRetriever;
+import net.phedny.valuemanager.data.assetrate.SilverMountainRetriever;
+import net.phedny.valuemanager.data.assetrate.SnsFundCoachRetriever;
 
 public class ValueManager {
 
 	public static void main(String[] args) {
-		AssetRateRetriever assetRateRetrievers[] = { new SilverMountainAssetRateRetriever(),
-				new SnsFundCoachRateRetriever() };
+		AssetRateRetriever assetRateRetrievers[] = { new SilverMountainRetriever(), new SnsFundCoachRetriever() };
 
 		for (AssetRateRetriever retriever : assetRateRetrievers) {
 			retriever.retrieve();

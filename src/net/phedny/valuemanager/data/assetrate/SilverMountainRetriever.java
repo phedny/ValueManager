@@ -20,7 +20,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-public class SilverMountainAssetRateRetriever implements AssetRateRetriever {
+public class SilverMountainRetriever implements AssetRateRetriever {
 
 	private static final String ASSET_ID_GOLD = "https://www.thesilvermountain.nl/nl/goudkoers/";
 

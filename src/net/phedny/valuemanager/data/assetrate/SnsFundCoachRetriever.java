@@ -27,7 +27,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
-public class SnsFundCoachRateRetriever implements AssetRateRetriever {
+public class SnsFundCoachRetriever implements AssetRateRetriever {
 
 	private static final Pattern RATE_LINE = Pattern
 			.compile(".*<td[^>]*>(&#[0-9]*;|[A-Z]*)</td><td[^>]*><a[^>]*>([0-9.,]*)</a></td>.*");
@@ -42,11 +42,11 @@ public class SnsFundCoachRateRetriever implements AssetRateRetriever {
 
 	private Map<String, AssetRate> assetRates;
 
-	public SnsFundCoachRateRetriever() {
+	public SnsFundCoachRetriever() {
 		this.rating = -1;
 	}
 
-	public SnsFundCoachRateRetriever(int rating) {
+	public SnsFundCoachRetriever(int rating) {
 		this.rating = rating;
 	}
 
