@@ -33,7 +33,7 @@ public class SnsFundCoachRetriever implements AssetRateRetriever {
 			.compile(".*<td[^>]*>(&#[0-9]*;|[A-Z]*)</td><td[^>]*><a[^>]*>([0-9.,]*)</a></td>.*");
 
 	private static final Pattern NAME_LINE = Pattern
-			.compile(".*<td><a href=\"(/fonds/[^\"]*)\" class=\"Fondlist\">([^<]*)</a></td>.*");
+			.compile(".*<td><a href=\"/fonds/[^\"]*\" class=\"Fondlist\">([^<]*)</a></td>.*");
 
 	private static final Pattern COMPARE_LINE = Pattern
 			.compile(".*<td[^>]*><input[^>]*name=\"Compare\" value=\"([0-9]*)\"></td>.*");
@@ -109,7 +109,6 @@ public class SnsFundCoachRetriever implements AssetRateRetriever {
 
 			String valueStr = null;
 			String expressedInStr = null;
-			String identifierStr = null;
 			String nameStr = null;
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -122,8 +121,7 @@ public class SnsFundCoachRetriever implements AssetRateRetriever {
 
 				m = NAME_LINE.matcher(line);
 				if (m.matches()) {
-					identifierStr = m.group(1);
-					nameStr = m.group(2);
+					nameStr = m.group(1);
 					continue;
 				}
 
@@ -132,7 +130,7 @@ public class SnsFundCoachRetriever implements AssetRateRetriever {
 
 					Locale dutchLocale = new Locale("nl", "NL");
 					NumberFormat numberParser = NumberFormat.getNumberInstance(dutchLocale);
-					final String assetId = "http://www.snsfundcoach.nl" + identifierStr;
+					final String assetId = "nl.snsfundcoach.fund." + m.group(1);
 					final String assetName = nameStr;
 					final Number assetValue = numberParser.parse(valueStr);
 					final String expressedIn;

@@ -22,9 +22,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 public class SilverMountainRetriever implements AssetRateRetriever {
 
-	private static final String ASSET_ID_GOLD = "https://www.thesilvermountain.nl/nl/goudkoers/";
+	private static final String ASSET_ID_GOLD = "XAU";
 
-	private static final String ASSET_ID_SILVER = "https://www.thesilvermountain.nl/nl/zilverkoers/";
+	private static final String ASSET_ID_SILVER = "XAG";
 
 	private static final Pattern GOLD_RATE_LINE = Pattern
 			.compile("<p>&euro; ([0-9.,]*)<br /> <a href=\"/nl/goudkoers/\">Goudkoers &gt;</a></p>");
@@ -98,7 +98,7 @@ public class SilverMountainRetriever implements AssetRateRetriever {
 		HttpClient httpClient = new DefaultHttpClient();
 		InputStream contentStream = null;
 		try {
-			HttpGet get = new HttpGet(ASSET_ID_GOLD);
+			HttpGet get = new HttpGet("https://www.thesilvermountain.nl/nl/goudkoers/");
 			HttpResponse response = httpClient.execute(get);
 			HttpEntity entity = response.getEntity();
 			contentStream = entity.getContent();
