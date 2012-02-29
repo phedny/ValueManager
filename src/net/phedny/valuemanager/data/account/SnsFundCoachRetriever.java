@@ -237,7 +237,13 @@ public class SnsFundCoachRetriever implements AccountRetriever {
 						}
 					}
 				}
+				contentStream.close();
+				contentStream = null;
 			}
+			
+			get = new HttpGet("https://www.snsfundcoach.nl/logout.asp");
+			response = httpClient.execute(get, context);
+			get.abort();
 
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
