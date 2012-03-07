@@ -16,7 +16,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.phedny.valuemanager.data.Account;
-import net.phedny.valuemanager.data.AccountAsset;
 import net.phedny.valuemanager.data.AccountRetriever;
 
 import org.apache.http.HttpEntity;
@@ -170,48 +169,12 @@ public class MoneYouRetriever implements AccountRetriever {
 				if (m.matches()) {
 					Locale dutchLocale = new Locale("nl", "NL");
 					NumberFormat numberParser = NumberFormat.getNumberInstance(dutchLocale);
-					final String accountId = m.group(2).replaceAll("\\.", "");
-					final Number accountAmount = numberParser.parse(m.group(3));
-					final String accountAssetId = m.group(4);
-					Account account = new Account() {
-
-						@Override
-						public String getAccountId() {
-							return "SEPA/NL47ABNA0000000000".substring(0, 23 - accountId.length()) + accountId;
-						}
-
-						@Override
-						public String getAccountName() {
-							return accountId;
-						}
-
-						@Override
-						public AccountAsset getAsset(String assetId) {
-							if (accountAssetId.equals(assetId)) {
-								return new AccountAsset() {
-
-									@Override
-									public Number getAmount() {
-										return accountAmount;
-									}
-
-									@Override
-									public String getAssetId() {
-										return accountAssetId;
-									}
-
-								};
-							}
-							return null;
-						}
-
-						@Override
-						public String[] getAssetIds() {
-							return new String[] { accountAssetId };
-						}
-
-					};
-					accounts.put(accountId, account);
+					final String accountName = m.group(2).replaceAll("\\.", "");
+					final String accountId = "net.phedny.valuemanager.sepa.NL47ABNA0000000000".substring(0,
+							47 - accountName.length());
+					Account account = new SimpleAccount(accountId + accountName, accountName, m.group(4), numberParser
+							.parse(m.group(3)));
+					accounts.put(accountName, account);
 				}
 			}
 			contentStream.close();

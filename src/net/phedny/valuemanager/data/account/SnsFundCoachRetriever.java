@@ -131,51 +131,14 @@ public class SnsFundCoachRetriever implements AccountRetriever {
 
 				m = CASH_AMOUNT_LINE.matcher(line);
 				if (cashAccountStr != null && m.matches()) {
-
 					Locale dutchLocale = new Locale("nl", "NL");
 					NumberFormat numberParser = NumberFormat.getNumberInstance(dutchLocale);
-					final String accountId = cashAccountStr;
-					final Number accountAmount = numberParser.parse(m.group(1));
-
-					Account account = new Account() {
-
-						@Override
-						public String getAccountId() {
-							return "SEPA/NL44SNSB0000000000".substring(0, 23 - accountId.length()) + accountId;
-						}
-
-						@Override
-						public String getAccountName() {
-							return accountId;
-						}
-
-						@Override
-						public AccountAsset getAsset(String assetId) {
-							if ("EUR".equals(assetId)) {
-								return new AccountAsset() {
-
-									@Override
-									public Number getAmount() {
-										return accountAmount;
-									}
-
-									@Override
-									public String getAssetId() {
-										return "EUR";
-									}
-
-								};
-							}
-							return null;
-						}
-
-						@Override
-						public String[] getAssetIds() {
-							return new String[] { "EUR" };
-						}
-
-					};
-					accounts.put(accountId, account);
+					final String accountName = cashAccountStr;
+					final String accountId = "net.phedny.valuemanager.sepa.NL44SNSB0000000000".substring(0,
+							47 - accountName.length())
+							+ accountName;
+					Account account = new SimpleAccount(accountId, accountName, "EUR", numberParser.parse(m.group(1)));
+					accounts.put(accountName, account);
 				}
 
 			}
