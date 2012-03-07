@@ -121,9 +121,6 @@ public class MoneYouRetriever implements AccountRetriever {
 
 			post.abort();
 
-			// GET:
-			// https://sparen.moneyou.nl/exp/jsp/entrypoint.jsp?state=000001
-			// geeft overzicht rekeningen
 			get = new HttpGet("https://sparen.moneyou.nl/exp/jsp/entrypoint.jsp?state=000001");
 			response = httpClient.execute(get, context);
 			if (response.getStatusLine().getStatusCode() != 200) {
@@ -155,18 +152,6 @@ public class MoneYouRetriever implements AccountRetriever {
 			contentStream.close();
 			contentStream = null;
 
-			// POST: https://sparen.moneyou.nl/exp/jsp/entrypoint.jsp
-			// screen:BISY02
-			// service:BISY
-			// state:134021006 <-- uitlezen?
-			// swipsc:N
-			// pwdpsc:
-			// chlpsc:
-			// butpsc:
-			// numabt:07464404 <-- uitlezen?
-			// error:
-			// graph:09
-			// Subm99:12 <-- uitlezen uit linkTo()
 			post = new HttpPost("https://sparen.moneyou.nl/exp/jsp/entrypoint.jsp");
 			post.setEntity(new UrlEncodedFormEntity(params));
 			response = httpClient.execute(post, context);
