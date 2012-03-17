@@ -55,11 +55,11 @@ public class MoneYouRetriever implements AccountRetriever {
 	}
 
 	@Override
-	public Account getAccount(String accontId) {
+	public Account getAccount(String accountId) {
 		if (accounts == null) {
 			return null;
 		}
-		return accounts.get(accontId);
+		return accounts.get(accountId);
 	}
 
 	@Override
