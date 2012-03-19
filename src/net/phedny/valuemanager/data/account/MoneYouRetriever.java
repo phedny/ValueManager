@@ -44,7 +44,7 @@ public class MoneYouRetriever implements AccountRetriever {
 			.compile(".*<TD[^>]*><A HREF=\"javascript:linkTo\\(01,([0-9]*)\\)\"><SPAN[^>]*>Spaarrekening</SPAN></A></TD>.*");
 
 	private static final Pattern ACCOUNT_LINE = Pattern
-			.compile(".*<tr[^>]*><TD[^>]*><INPUT[^>]*></TD><TD[^>]*><A HREF=\"javascript:linkTo\\(([0-9]*),13\\)\">([0-9.]*)</A></TD><TD[^>]*>.*</TD><TD[^>]*>[^<]*</TD><TD[^>]*>[^<]*</TD><TD[^>]*>.*</TD><TD[^>]*>([0-9.,]*) *([A-Z]*)</TD></TR>.*");
+			.compile(".*<tr[^>]*><TD[^>]*><INPUT[^>]*></TD><TD[^>]*><A HREF=\"javascript:linkTo\\((?:[0-9]*),19\\)\"><IMG[^>]*></A></TD><TD[^>]*>.*</TD><TD[^>]*><A HREF=\"javascript:linkTo\\(([0-9]*),13\\)\">([0-9.]*)</A></TD><TD[^>]*>.*</TD><TD[^>]*>[^<]*</TD><TD[^>]*>.*</TD><TD[^>]*>([0-9.,]*) *([A-Z]*)</TD></TR>.*");
 
 	private final String username;
 
