@@ -285,7 +285,7 @@ public class RaboAndroidRetriever implements AccountRetriever {
 			while ((line = reader.readLine()) != null) {
 				Matcher m = ACCOUNT_LINE.matcher(line);
 				while (m.find()) {
-					Locale dutchLocale = new Locale("nl", "NL");
+					Locale dutchLocale = new Locale("en", "US");
 					NumberFormat numberParser = NumberFormat.getNumberInstance(dutchLocale);
 					final String accountName = m.group(1);
 					final String accountId = "net.phedny.valuemanager.sepa.NL57RABO0000000000".substring(0,
