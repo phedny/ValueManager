@@ -7,16 +7,17 @@ import java.io.InputStreamReader;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.phedny.valuemanager.data.AssetRate;
 import net.phedny.valuemanager.data.AssetRateRetriever;
+import net.phedny.valuemanager.data.MultiRetriever;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -27,7 +28,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
-public class SnsFundCoachRetriever implements AssetRateRetriever {
+public class SnsFundCoachRetriever implements AssetRateRetriever, MultiRetriever<Integer> {
 
 	private static final Pattern RATE_LINE = Pattern
 			.compile(".*<td[^>]*>(&#[0-9]*;|[A-Z]*)</td><td[^>]*><a[^>]*>([0-9.,]*)</a></td>.*");
@@ -68,18 +69,33 @@ public class SnsFundCoachRetriever implements AssetRateRetriever {
 	}
 
 	@Override
-	public void retrieve() {
-		assetRates = new HashMap<String, AssetRate>();
+	public void initialize() {
+		assetRates = new ConcurrentHashMap<String, AssetRate>();
+	}
+
+	@Override
+	public Integer[] getItems() {
 		if (rating == -1) {
-			for (int i = 1; i < 6; i++) {
-				retrieve(i);
+			Integer[] items = new Integer[5];
+			for (int i = 0; i < 5; i++) {
+				items[i] = Integer.valueOf(i + 1);
 			}
+			return items;
 		} else {
-			retrieve(rating);
+			return new Integer[] { Integer.valueOf(rating) };
 		}
 	}
 
-	private void retrieve(int rating) {
+	@Override
+	public void retrieve() {
+		initialize();
+		for (Integer item : getItems()) {
+			retrieve(item);
+		}
+	}
+
+	@Override
+	public void retrieve(Integer rating) {
 		HttpClient httpClient = new DefaultHttpClient();
 		InputStream contentStream = null;
 		try {

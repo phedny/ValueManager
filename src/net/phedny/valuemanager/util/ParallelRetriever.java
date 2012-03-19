@@ -12,12 +12,15 @@ import net.phedny.valuemanager.data.Account;
 import net.phedny.valuemanager.data.AccountRetriever;
 import net.phedny.valuemanager.data.AssetRate;
 import net.phedny.valuemanager.data.AssetRateRetriever;
+import net.phedny.valuemanager.data.MultiRetriever;
 
 public class ParallelRetriever implements AccountRetriever, AssetRateRetriever {
 
 	private Set<AccountRetriever> accountRetrievers = new HashSet<AccountRetriever>();
 
 	private Set<AssetRateRetriever> assetRateRetrievers = new HashSet<AssetRateRetriever>();
+	
+	private Set<MultiRetriever<?>> multiRetrievers = new HashSet<MultiRetriever<?>>();
 
 	private Set<Callable<Void>> retrieverCallables = new HashSet<Callable<Void>>();
 
@@ -25,26 +28,50 @@ public class ParallelRetriever implements AccountRetriever, AssetRateRetriever {
 
 	private Map<String, AssetRateRetriever> assetRates = new HashMap<String, AssetRateRetriever>();
 
-	public void addRetriever(final AccountRetriever retriever) {
-		accountRetrievers.add(retriever);
-		retrieverCallables.add(new Callable<Void>() {
-			@Override
-			public Void call() throws Exception {
-				retriever.retrieve();
-				return null;
+	private <T> boolean addMultiRetriever(final Object retriever) {
+		if (retriever instanceof MultiRetriever<?>) {
+			@SuppressWarnings("unchecked")
+			final MultiRetriever<T> multiRetriever = (MultiRetriever<T>) retriever;
+			multiRetrievers.add(multiRetriever);
+			for (final T item : multiRetriever.getItems()) {
+				retrieverCallables.add(new Callable<Void>() {
+					@Override
+					public Void call() throws Exception {
+						multiRetriever.retrieve(item);
+						return null;
+					}
+				});
 			}
-		});
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public <T> void addRetriever(final AccountRetriever retriever) {
+		accountRetrievers.add(retriever);
+		if (!addMultiRetriever(retriever)) {
+			retrieverCallables.add(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					retriever.retrieve();
+					return null;
+				}
+			});
+		}
 	}
 
 	public void addRetriever(final AssetRateRetriever retriever) {
 		assetRateRetrievers.add(retriever);
-		retrieverCallables.add(new Callable<Void>() {
-			@Override
-			public Void call() throws Exception {
-				retriever.retrieve();
-				return null;
-			}
-		});
+		if (!addMultiRetriever(retriever)) {
+			retrieverCallables.add(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					retriever.retrieve();
+					return null;
+				}
+			});
+		}
 	}
 
 	@Override
@@ -89,6 +116,10 @@ public class ParallelRetriever implements AccountRetriever, AssetRateRetriever {
 
 	@Override
 	public void retrieve() {
+		for (MultiRetriever<?> retriever : multiRetrievers) {
+			retriever.initialize();
+		}
+		
 		try {
 			ExecutorService executor = Executors.newCachedThreadPool();
 			executor.invokeAll(retrieverCallables);
