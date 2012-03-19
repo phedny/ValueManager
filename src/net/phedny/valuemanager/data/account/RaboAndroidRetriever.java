@@ -148,29 +148,12 @@ public class RaboAndroidRetriever implements AccountRetriever {
 		post.setHeader("Accept", "application/xml");
 
 		HttpResponse response = httpClient.execute(post, context);
-		// if (response.getStatusLine().getStatusCode() != 200) {
-		// post.abort();
-		// return false;
-		// }
-
-		InputStream contentStream = null;
-		try {
-			HttpEntity entity = response.getEntity();
-			contentStream = entity.getContent();
-			InputStreamReader isReader = new InputStreamReader(contentStream, "UTF-8");
-			BufferedReader reader = new BufferedReader(isReader);
-
-			String line;
-			while ((line = reader.readLine()) != null) {
-//				System.out.println(line);
-			}
-		} finally {
-			if (contentStream != null) {
-				contentStream.close();
-			}
+		if (response.getStatusLine().getStatusCode() != 200) {
+			post.abort();
+			return false;
 		}
 
-		// post.abort();
+		post.abort();
 		return true;
 	}
 
