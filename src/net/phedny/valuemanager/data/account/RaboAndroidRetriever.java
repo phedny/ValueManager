@@ -38,7 +38,7 @@ public class RaboAndroidRetriever implements AccountRetriever {
 
 	private static final String RR_LOGIN = "<?xml version='1.0' encoding='UTF-8' ?><LogonRr xmlns=\"https://bankservices.rabobank.nl/auth/logonrr/v2/request\"><BankAccountNumber>%s</BankAccountNumber><BankCardNumber>%s</BankCardNumber><LogonToken>%s</LogonToken><UserAuthenticationCode>%s</UserAuthenticationCode></LogonRr>";
 
-	private static final String AC_LOGIN = " <?xml version='1.0' encoding='UTF-8' ?><LogonAc xmlns=\"https://bankservices.rabobank.nl/services/auth/logonac/v2/request\"><AccessCode>%s</AccessCode><BankAccountNumber>%s</BankAccountNumber><LogonToken>%s</LogonToken><SetUserDeviceAccess>1</SetUserDeviceAccess></LogonAc>";
+	private static final String AC_LOGIN = "<?xml version='1.0' encoding='UTF-8' ?><LogonAc xmlns=\"https://bankservices.rabobank.nl/services/auth/logonac/v2/request\"><AccessCode>%s</AccessCode><BankAccountNumber>%s</BankAccountNumber><LogonToken>%s</LogonToken><SetUserDeviceAccess>1</SetUserDeviceAccess></LogonAc>";
 
 	private static final String LOGOFF = "<?xml version='1.0' encoding='UTF-8' ?><Logoff xmlns=\"https://bankservices.rabobank.nl/auth/logoff/v2/request\"><LogoffBy>A</LogoffBy></Logoff>";
 
