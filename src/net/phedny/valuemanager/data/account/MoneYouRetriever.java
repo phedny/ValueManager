@@ -34,6 +34,9 @@ import org.apache.http.protocol.HttpContext;
 
 public class MoneYouRetriever implements AccountRetriever {
 
+	private static final Pattern PASSWORD_EXPIRED_LINE = Pattern
+			.compile(".*value=\"0000 Uw wachtwoord is vervallen. Gelieve een nieuw wachtwoord aan te maken.\".*");
+
 	private static final Pattern INPUT_LINE = Pattern
 			.compile(".*<INPUT type=\"hidden\" value=\"([^\"]*)\" id=\"[^\"]*\" name=\"([^\"]*)\">.*");
 
@@ -144,6 +147,14 @@ public class MoneYouRetriever implements AccountRetriever {
 				m = LINKTO_LINE.matcher(line);
 				if (m.matches()) {
 					subm99 = m.group(1);
+				}
+				
+				m = PASSWORD_EXPIRED_LINE.matcher(line);
+				if (m.matches()) {
+					System.out.println("[!!!] MoneYou password has expired!");
+					contentStream.close();
+					get.abort();
+					return;
 				}
 			}
 			params.add(new BasicNameValuePair("graph", "09"));
