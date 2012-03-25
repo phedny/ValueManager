@@ -35,7 +35,7 @@ import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
-public class RaboAndroidRetriever implements AccountRetriever {
+public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookieSupport {
 
 	private static final String LOGON_INFO = "<?xml version='1.0' encoding='UTF-8' ?><LogonInfo xmlns=\"https://bankservices.rabobank.nl/auth/logoninfo/v1/request\"><EntranceCode>%s</EntranceCode><RequestedService>%s</RequestedService></LogonInfo>";
 
