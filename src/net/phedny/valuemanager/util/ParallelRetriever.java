@@ -13,6 +13,7 @@ import net.phedny.valuemanager.data.AccountRetriever;
 import net.phedny.valuemanager.data.AssetRate;
 import net.phedny.valuemanager.data.AssetRateRetriever;
 import net.phedny.valuemanager.data.MultiRetriever;
+import net.phedny.valuemanager.data.RetrieverException;
 
 public class ParallelRetriever implements AccountRetriever, AssetRateRetriever {
 
@@ -115,7 +116,7 @@ public class ParallelRetriever implements AccountRetriever, AssetRateRetriever {
 	}
 
 	@Override
-	public void retrieve() {
+	public void retrieve() throws RetrieverException {
 		for (MultiRetriever<?> retriever : multiRetrievers) {
 			retriever.initialize();
 		}

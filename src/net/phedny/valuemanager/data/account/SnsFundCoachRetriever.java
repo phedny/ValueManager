@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import net.phedny.valuemanager.data.Account;
 import net.phedny.valuemanager.data.AccountAsset;
 import net.phedny.valuemanager.data.AccountRetriever;
+import net.phedny.valuemanager.data.RetrieverException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -77,7 +78,7 @@ public class SnsFundCoachRetriever implements AccountRetriever {
 	}
 
 	@Override
-	public void retrieve() {
+	public void retrieve() throws RetrieverException {
 		accounts = new HashMap<String, Account>();
 		HttpClient httpClient = new DefaultHttpClient();
 		httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
@@ -209,11 +210,11 @@ public class SnsFundCoachRetriever implements AccountRetriever {
 			get.abort();
 
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			throw new RetrieverException(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RetrieverException(e);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			throw new RetrieverException(e);
 		} finally {
 			if (contentStream != null) {
 				try {

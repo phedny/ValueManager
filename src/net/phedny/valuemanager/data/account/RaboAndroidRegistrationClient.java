@@ -10,6 +10,8 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.phedny.valuemanager.data.RetrieverException;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -205,7 +207,7 @@ public class RaboAndroidRegistrationClient {
 		post.abort();
 	}
 
-	public void registerDevice(String randomReaderCode) {
+	public void registerDevice(String randomReaderCode) throws RetrieverException {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
 		HttpContext context = new BasicHttpContext();
@@ -238,7 +240,7 @@ public class RaboAndroidRegistrationClient {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RetrieverException(e);
 		}
 	}
 

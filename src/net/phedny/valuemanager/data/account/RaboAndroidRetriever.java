@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import net.phedny.valuemanager.data.Account;
 import net.phedny.valuemanager.data.AccountRetriever;
+import net.phedny.valuemanager.data.RetrieverException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -220,7 +221,7 @@ public class RaboAndroidRetriever implements AccountRetriever {
 	}
 
 	@Override
-	public void retrieve() {
+	public void retrieve() throws RetrieverException {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
 		HttpContext context = new BasicHttpContext();
@@ -259,7 +260,7 @@ public class RaboAndroidRetriever implements AccountRetriever {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RetrieverException(e);
 		}
 	}
 

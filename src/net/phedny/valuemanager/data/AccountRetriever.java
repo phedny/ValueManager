@@ -2,7 +2,7 @@ package net.phedny.valuemanager.data;
 
 public interface AccountRetriever {
 
-	void retrieve();
+	void retrieve() throws RetrieverException;
 	
 	String[] getAccountIds();
 	
