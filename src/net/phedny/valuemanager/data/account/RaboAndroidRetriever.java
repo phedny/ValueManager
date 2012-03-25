@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import net.phedny.valuemanager.data.Account;
 import net.phedny.valuemanager.data.AccountRetriever;
+import net.phedny.valuemanager.data.RetrieverException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -79,7 +80,8 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 		return keySet.toArray(new String[keySet.size()]);
 	}
 
-	private boolean checkAppStatus(DefaultHttpClient httpClient, HttpContext context) throws IOException {
+	private boolean checkAppStatus(DefaultHttpClient httpClient, HttpContext context) throws IOException,
+			RetrieverException {
 		HttpGet get = new HttpGet("https://bankservices.rabobank.nl/appstatus/android/2.0.1-status.xml");
 		get.setHeader("Content-Type", "application/xml");
 		get.setHeader("Accept", "application/xml");
@@ -87,7 +89,8 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 		HttpResponse response = httpClient.execute(get, context);
 		if (response.getStatusLine().getStatusCode() != 200) {
 			get.abort();
-			return false;
+			throw new RetrieverException("Expected HTTP 200 from " + get.getURI() + ", received "
+					+ response.getStatusLine());
 		}
 
 		get.abort();
@@ -95,7 +98,7 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 	}
 
 	private String requestLogonToken(DefaultHttpClient httpClient, HttpContext context, String service)
-			throws IOException {
+			throws IOException, RetrieverException {
 		HttpPost post = new HttpPost("https://bankservices.rabobank.nl/auth/logoninfo/v1/");
 		final Calendar nowGmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 		final String formattedDate = new SimpleDateFormat("yyyyMMddHHmm").format(nowGmt.getTime());
@@ -108,7 +111,8 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 		HttpResponse response = httpClient.execute(post, context);
 		if (response.getStatusLine().getStatusCode() != 200) {
 			post.abort();
-			return null;
+			throw new RetrieverException("Expected HTTP 200 from " + post.getURI() + ", received "
+					+ response.getStatusLine());
 		}
 
 		InputStream contentStream = null;
@@ -136,7 +140,7 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 	}
 
 	private boolean loginWithAccessCode(DefaultHttpClient httpClient, HttpContext context, String bankAccount,
-			String accessCode) throws IOException {
+			String accessCode) throws IOException, RetrieverException {
 		String logonToken = requestLogonToken(httpClient, context,
 				"https://bankservices.rabobank.nl/services/balanceviewsettings/v1");
 
@@ -150,14 +154,16 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 		HttpResponse response = httpClient.execute(post, context);
 		if (response.getStatusLine().getStatusCode() != 200) {
 			post.abort();
-			return false;
+			throw new RetrieverException("Expected HTTP 200 from " + post.getURI() + ", received "
+					+ response.getStatusLine());
 		}
 
 		post.abort();
 		return true;
 	}
 
-	private List<Account> retrieveAccounts(DefaultHttpClient httpClient, HttpContext context) throws IOException {
+	private List<Account> retrieveAccounts(DefaultHttpClient httpClient, HttpContext context) throws IOException,
+			RetrieverException {
 		List<Account> accountList = new ArrayList<Account>();
 		HttpGet get = new HttpGet("https://bankservices.rabobank.nl/services/productoverview/v1");
 		get.setHeader("Content-Type", "application/xml");
@@ -166,7 +172,8 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 		HttpResponse response = httpClient.execute(get, context);
 		if (response.getStatusLine().getStatusCode() != 200) {
 			get.abort();
-			return null;
+			throw new RetrieverException("Expected HTTP 200 from " + get.getURI() + ", received "
+					+ response.getStatusLine());
 		}
 
 		InputStream contentStream = null;
@@ -220,7 +227,7 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 	}
 
 	@Override
-	public void retrieve() {
+	public void retrieve() throws RetrieverException {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
 		HttpContext context = new BasicHttpContext();
@@ -235,13 +242,11 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 			cookieStore.addCookie(newCookie);
 
 			if (!checkAppStatus(httpClient, context)) {
-				System.err.println("App status not OK");
-				return;
+				throw new RetrieverException("Application status is not OK");
 			}
 
 			if (!loginWithAccessCode(httpClient, context, accountNumber, accessCode)) {
-				System.err.println("Login with access code not OK");
-				return;
+				throw new RetrieverException("Login with access code failed", true);
 			}
 
 			List<Account> accountList = retrieveAccounts(httpClient, context);
@@ -259,7 +264,7 @@ public class RaboAndroidRetriever implements AccountRetriever, RaboAndroidCookie
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RetrieverException(e);
 		}
 	}
 

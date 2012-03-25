@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import net.phedny.valuemanager.data.AssetRate;
 import net.phedny.valuemanager.data.AssetRateRetriever;
 import net.phedny.valuemanager.data.MultiRetriever;
+import net.phedny.valuemanager.data.RetrieverException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -87,7 +88,7 @@ public class SnsFundCoachRetriever implements AssetRateRetriever, MultiRetriever
 	}
 
 	@Override
-	public void retrieve() {
+	public void retrieve() throws RetrieverException {
 		initialize();
 		for (Integer item : getItems()) {
 			retrieve(item);
@@ -95,7 +96,7 @@ public class SnsFundCoachRetriever implements AssetRateRetriever, MultiRetriever
 	}
 
 	@Override
-	public void retrieve(Integer rating) {
+	public void retrieve(Integer rating) throws RetrieverException {
 		HttpClient httpClient = new DefaultHttpClient();
 		InputStream contentStream = null;
 		try {
@@ -190,11 +191,11 @@ public class SnsFundCoachRetriever implements AssetRateRetriever, MultiRetriever
 			}
 
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			throw new RetrieverException(e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RetrieverException(e);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			throw new RetrieverException(e);
 		} finally {
 			if (contentStream != null) {
 				try {

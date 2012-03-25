@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import net.phedny.valuemanager.data.AssetRate;
 import net.phedny.valuemanager.data.AssetRateRetriever;
+import net.phedny.valuemanager.data.RetrieverException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -94,7 +95,7 @@ public class SilverMountainRetriever implements AssetRateRetriever {
 	}
 
 	@Override
-	public void retrieve() {
+	public void retrieve() throws RetrieverException {
 		HttpClient httpClient = new DefaultHttpClient();
 		InputStream contentStream = null;
 		try {
@@ -142,17 +143,17 @@ public class SilverMountainRetriever implements AssetRateRetriever {
 			silverValue = numberParser.parse(silverValueStr);
 
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
 			goldValue = null;
 			silverValue = null;
+			throw new RetrieverException(e);
 		} catch (IOException e) {
-			e.printStackTrace();
 			goldValue = null;
 			silverValue = null;
+			throw new RetrieverException(e);
 		} catch (ParseException e) {
-			e.printStackTrace();
 			goldValue = null;
 			silverValue = null;
+			throw new RetrieverException(e);
 		} finally {
 			if (contentStream != null) {
 				try {
