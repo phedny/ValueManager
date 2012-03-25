@@ -88,7 +88,8 @@ public class MoneYouRetriever implements AccountRetriever {
 			HttpResponse response = httpClient.execute(get, context);
 			if (response.getStatusLine().getStatusCode() != 200) {
 				get.abort();
-				return;
+				throw new RetrieverException("Expected HTTP 200 from " + get.getURI() + ", received "
+						+ response.getStatusLine());
 			}
 
 			get.abort();
@@ -119,7 +120,8 @@ public class MoneYouRetriever implements AccountRetriever {
 			response = httpClient.execute(post, context);
 			if (response.getStatusLine().getStatusCode() != 200) {
 				post.abort();
-				return;
+				throw new RetrieverException("Expected HTTP 200 from " + post.getURI() + ", received "
+						+ response.getStatusLine());
 			}
 
 			post.abort();
@@ -128,7 +130,8 @@ public class MoneYouRetriever implements AccountRetriever {
 			response = httpClient.execute(get, context);
 			if (response.getStatusLine().getStatusCode() != 200) {
 				get.abort();
-				return;
+				throw new RetrieverException("Expected HTTP 200 from " + get.getURI() + ", received "
+						+ response.getStatusLine());
 			}
 
 			HttpEntity entity = response.getEntity();
@@ -149,13 +152,12 @@ public class MoneYouRetriever implements AccountRetriever {
 				if (m.matches()) {
 					subm99 = m.group(1);
 				}
-				
+
 				m = PASSWORD_EXPIRED_LINE.matcher(line);
 				if (m.matches()) {
-					System.out.println("[!!!] MoneYou password has expired!");
 					contentStream.close();
 					get.abort();
-					return;
+					throw new RetrieverException("Password of MoneYou account has expired", true);
 				}
 			}
 			params.add(new BasicNameValuePair("graph", "09"));
@@ -168,7 +170,8 @@ public class MoneYouRetriever implements AccountRetriever {
 			response = httpClient.execute(post, context);
 			if (response.getStatusLine().getStatusCode() != 200) {
 				post.abort();
-				return;
+				throw new RetrieverException("Expected HTTP 200 from " + post.getURI() + ", received "
+						+ response.getStatusLine());
 			}
 
 			entity = response.getEntity();

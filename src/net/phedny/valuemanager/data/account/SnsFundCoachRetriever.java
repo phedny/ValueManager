@@ -97,7 +97,8 @@ public class SnsFundCoachRetriever implements AccountRetriever {
 			HttpResponse response = httpClient.execute(post, context);
 			if (response.getStatusLine().getStatusCode() != 302) {
 				post.abort();
-				return;
+				throw new RetrieverException("Expected HTTP 302 from " + post.getURI() + ", received "
+						+ response.getStatusLine());
 			}
 
 			post.abort();
@@ -106,7 +107,8 @@ public class SnsFundCoachRetriever implements AccountRetriever {
 			response = httpClient.execute(get, context);
 			if (response.getStatusLine().getStatusCode() != 200) {
 				get.abort();
-				return;
+				throw new RetrieverException("Expected HTTP 200 from " + get.getURI() + ", received "
+						+ response.getStatusLine());
 			}
 
 			HttpEntity entity = response.getEntity();
@@ -161,7 +163,8 @@ public class SnsFundCoachRetriever implements AccountRetriever {
 
 				if (response.getStatusLine().getStatusCode() != 200) {
 					post.abort();
-					return;
+					throw new RetrieverException("Expected HTTP 200 from " + post.getURI() + ", received "
+							+ response.getStatusLine());
 				}
 
 				entity = response.getEntity();

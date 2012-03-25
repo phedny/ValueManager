@@ -52,7 +52,8 @@ public class RaboAndroidRegistrationClient {
 		this.cardNumber = cardNumber;
 	}
 
-	private boolean checkAppStatus(DefaultHttpClient httpClient, HttpContext context) throws IOException {
+	private boolean checkAppStatus(DefaultHttpClient httpClient, HttpContext context) throws IOException,
+			RetrieverException {
 		HttpGet get = new HttpGet("https://bankservices.rabobank.nl/appstatus/android/2.0.1-status.xml");
 		get.setHeader("Content-Type", "application/xml");
 		get.setHeader("Accept", "application/xml");
@@ -60,7 +61,8 @@ public class RaboAndroidRegistrationClient {
 		HttpResponse response = httpClient.execute(get, context);
 		if (response.getStatusLine().getStatusCode() != 200) {
 			get.abort();
-			return false;
+			throw new RetrieverException("Expected HTTP 200 from " + get.getURI() + ", received "
+					+ response.getStatusLine());
 		}
 
 		get.abort();
@@ -68,7 +70,7 @@ public class RaboAndroidRegistrationClient {
 	}
 
 	private String requestLogonToken(DefaultHttpClient httpClient, HttpContext context, String service)
-			throws IOException {
+			throws IOException, RetrieverException {
 		HttpPost post = new HttpPost("https://bankservices.rabobank.nl/auth/logoninfo/v1/");
 		final Calendar nowGmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 		final String formattedDate = new SimpleDateFormat("yyyyMMddHHmm").format(nowGmt.getTime());
@@ -81,7 +83,8 @@ public class RaboAndroidRegistrationClient {
 		HttpResponse response = httpClient.execute(post, context);
 		if (response.getStatusLine().getStatusCode() != 200) {
 			post.abort();
-			return null;
+			throw new RetrieverException("Expected HTTP 200 from " + post.getURI() + ", received "
+					+ response.getStatusLine());
 		}
 
 		InputStream contentStream = null;
@@ -109,7 +112,7 @@ public class RaboAndroidRegistrationClient {
 	}
 
 	private boolean loginWithRandomReader(DefaultHttpClient httpClient, HttpContext context, String bankAccount,
-			String cardNumber, String accessCode) throws IOException {
+			String cardNumber, String accessCode) throws IOException, RetrieverException {
 		String logonToken = requestLogonToken(httpClient, context,
 				"https://bankservices.rabobank.nl/services/getactivesubscriptions/v1");
 
@@ -123,14 +126,16 @@ public class RaboAndroidRegistrationClient {
 		HttpResponse response = httpClient.execute(post, context);
 		if (response.getStatusLine().getStatusCode() != 200) {
 			post.abort();
-			return false;
+			throw new RetrieverException("Expected HTTP 200 from " + post.getURI() + ", received "
+					+ response.getStatusLine());
 		}
 
 		post.abort();
 		return true;
 	}
 
-	private boolean checkActiveSubscriptions(DefaultHttpClient httpClient, HttpContext context) throws IOException {
+	private boolean checkActiveSubscriptions(DefaultHttpClient httpClient, HttpContext context) throws IOException,
+			RetrieverException {
 		HttpGet get = new HttpGet("https://bankservices.rabobank.nl/services/getactivesubscriptions/v1");
 		get.setHeader("Content-Type", "application/xml");
 		get.setHeader("Accept", "application/xml");
@@ -138,7 +143,8 @@ public class RaboAndroidRegistrationClient {
 		HttpResponse response = httpClient.execute(get, context);
 		if (response.getStatusLine().getStatusCode() != 200) {
 			get.abort();
-			return false;
+			throw new RetrieverException("Expected HTTP 200 from " + get.getURI() + ", received "
+					+ response.getStatusLine());
 		}
 
 		InputStream contentStream = null;
@@ -175,7 +181,8 @@ public class RaboAndroidRegistrationClient {
 		}
 	}
 
-	private boolean registerDevice(DefaultHttpClient httpClient, HttpContext context) throws IOException {
+	private boolean registerDevice(DefaultHttpClient httpClient, HttpContext context) throws IOException,
+			RetrieverException {
 		HttpGet get = new HttpGet("https://bankservices.rabobank.nl/services/deviceregistration/v1");
 		get.setHeader("Content-Type", "application/xml");
 		get.setHeader("Accept", "application/xml");
@@ -183,7 +190,8 @@ public class RaboAndroidRegistrationClient {
 		HttpResponse response = httpClient.execute(get, context);
 		if (response.getStatusLine().getStatusCode() != 200) {
 			get.abort();
-			return false;
+			throw new RetrieverException("Expected HTTP 200 from " + get.getURI() + ", received "
+					+ response.getStatusLine());
 		}
 
 		get.abort();
@@ -213,23 +221,19 @@ public class RaboAndroidRegistrationClient {
 		HttpContext context = new BasicHttpContext();
 		try {
 			if (!checkAppStatus(httpClient, context)) {
-				System.err.println("App status not OK");
-				return;
+				throw new RetrieverException("Application status is not OK");
 			}
 
 			if (!loginWithRandomReader(httpClient, context, accountNumber, cardNumber, randomReaderCode)) {
-				System.err.println("Login with random reader not OK");
-				return;
+				throw new RetrieverException("Login with Random Reader failed", true);
 			}
 
 			if (!checkActiveSubscriptions(httpClient, context)) {
-				System.err.println("Active subscriptions not OK");
-				return;
+				throw new RetrieverException("Not all required subscriptions are active", true);
 			}
 
 			if (!registerDevice(httpClient, context)) {
-				System.err.println("Device not registered");
-				return;
+				throw new RetrieverException("Failed to register device", true);
 			}
 
 			logoff(httpClient, context);

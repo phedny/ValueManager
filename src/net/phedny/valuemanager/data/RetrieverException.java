@@ -16,6 +16,10 @@ public class RetrieverException extends Exception {
 		super(message, cause);
 		this.permanent = permanent;
 	}
+	
+	public RetrieverException(String message) {
+		this(message, false);
+	}
 
 	public RetrieverException(String message, boolean permanent) {
 		super(message);
