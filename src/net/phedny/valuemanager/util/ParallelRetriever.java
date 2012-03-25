@@ -2,11 +2,14 @@ package net.phedny.valuemanager.util;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import net.phedny.valuemanager.data.Account;
 import net.phedny.valuemanager.data.AccountRetriever;
@@ -28,6 +31,24 @@ public class ParallelRetriever implements AccountRetriever, AssetRateRetriever {
 	private Map<String, AccountRetriever> accounts = new HashMap<String, AccountRetriever>();
 
 	private Map<String, AssetRateRetriever> assetRates = new HashMap<String, AssetRateRetriever>();
+
+	private Set<RetrieverException> permanentExceptions;
+
+	private Set<RetrieverException> volatileExceptions;
+
+	private final boolean ignorePermanentExceptions;
+
+	private final boolean ignoreVolatileExceptions;
+
+	public ParallelRetriever() {
+		ignorePermanentExceptions = false;
+		ignoreVolatileExceptions = false;
+	}
+
+	public ParallelRetriever(boolean ignorePermanentExceptions, boolean ignoreVolatileExceptions) {
+		this.ignorePermanentExceptions = ignorePermanentExceptions;
+		this.ignoreVolatileExceptions = ignoreVolatileExceptions;
+	}
 
 	private <T> boolean addMultiRetriever(final Object retriever) {
 		if (retriever instanceof MultiRetriever<?>) {
@@ -123,8 +144,38 @@ public class ParallelRetriever implements AccountRetriever, AssetRateRetriever {
 		
 		try {
 			ExecutorService executor = Executors.newCachedThreadPool();
-			executor.invokeAll(retrieverCallables);
+			List<Future<Void>> futures = executor.invokeAll(retrieverCallables);
 			executor.shutdown();
+
+			permanentExceptions = new HashSet<RetrieverException>();
+			volatileExceptions = new HashSet<RetrieverException>();
+			for (Future<Void> future : futures) {
+				try {
+					future.get();
+				} catch (ExecutionException e) {
+					Throwable cause = e.getCause();
+					if (cause != null && cause instanceof RetrieverException) {
+						RetrieverException re = (RetrieverException) cause;
+						if (re.isPermanent()) {
+							permanentExceptions.add(re);
+						} else {
+							volatileExceptions.add(re);
+						}
+					} else if (cause != null) {
+						volatileExceptions.add(new RetrieverException(cause));
+					} else {
+						volatileExceptions.add(new RetrieverException(e));
+					}
+				}
+			}
+
+			if (!ignorePermanentExceptions || !ignoreVolatileExceptions) {
+				if (!volatileExceptions.isEmpty()) {
+					throw new RetrieverException("One or more retrievers threw a volatile exception");
+				} else if (!permanentExceptions.isEmpty()) {
+					throw new RetrieverException("One or more retrievers threw a permanent exception", true);
+				}
+			}
 
 			accounts = new HashMap<String, AccountRetriever>();
 			for (AccountRetriever retriever : accountRetrievers) {
@@ -141,6 +192,22 @@ public class ParallelRetriever implements AccountRetriever, AssetRateRetriever {
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public RetrieverException[] getPermanentExceptions() {
+		if (permanentExceptions == null) {
+			return null;
+		} else {
+			return permanentExceptions.toArray(new RetrieverException[permanentExceptions.size()]);
+		}
+	}
+
+	public RetrieverException[] getVolatileExceptions() {
+		if (volatileExceptions == null) {
+			return null;
+		} else {
+			return volatileExceptions.toArray(new RetrieverException[volatileExceptions.size()]);
 		}
 	}
 
